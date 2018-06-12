@@ -52,6 +52,12 @@
                         <Option v-for="user in users" :value="user.userId" :key="user.userId">{{user.userName}}</Option>
                     </Select>
                 </FormItem>
+                <FormItem label="医生职称">
+                    <Select v-model="currentClinicIndex.doctorTitle">
+                        <Option value="">--请选择---</Option>
+                        <Option v-for="title in titleDicts" :value="title.titleCode" :key="title.titleCode">{{title.titleName}}</Option>
+                    </Select>
+                </FormItem>
             </Form>
         </Modal>
 
@@ -99,7 +105,16 @@
                   }
               },{
                   title:"医生职称",
-                  key:'doctorTitle'
+                  key:'doctorTitle',
+                  render:(h,param)=>{
+                      let doctorTitleName = "";
+                      for(let key in this.titleDicts){
+                          if(this.titleDicts[key].titleCode==param.row.doctorTitle){
+                              doctorTitleName = this.titleDicts[key].titleName;
+                          }
+                      }
+                      return h("div",doctorTitleName)
+                  }
               },{
                   title:"输入码",
                   key:"inputCode"
@@ -147,7 +162,6 @@
             this.depts = this.$store.state.depts;
             this.users=this.$store.state.users;
             console.log(this.depts)
-            this.titleDicts = this.$store.state.titleDicts;
         },
         methods:{
             init:function(){
@@ -159,11 +173,18 @@
                 if(this.depts.length==0){
                     this.loadDepts();
                 }
+
+                this.loadDoctorTitle();
             },
 
             loadUsers:function(){
                 util.ajax.get("api/comm/get-user-info").then(res=>{
                     this.users= res.data;
+                })
+            },
+            loadDoctorTitle:function(){
+                util.ajax.get("api/comm/get-doctor-title-dict").then(res=>{
+                    this.titleDicts = res.data;
                 })
             },
             loadDepts:function(){
