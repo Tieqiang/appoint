@@ -35,6 +35,12 @@ const routers = [{
                 title:"主界面-预约确认"
             },
             component:(resolve)=>require(['./views/appoint-confirm.vue'],resolve)
+        },{
+            path:'user-manager',
+            meta:{
+                title:"主界面-用户管理"
+            },
+            component:(resolve)=>require(['./views/user-manager.vue'],resolve)
         }
     ]
 }];

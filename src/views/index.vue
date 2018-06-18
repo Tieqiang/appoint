@@ -17,6 +17,7 @@
         top: 15px;
         left: 20px;
     }
+
     .layout-nav {
         width: 520px;
         margin: 0 auto;
@@ -34,22 +35,43 @@
                 <Menu mode="horizontal" theme="dark" active-name="1" @on-select="menuSelect">
                     <div class="layout-logo"></div>
                     <div class="layout-nav">
-                        <MenuItem name="预约确认">
-                            <Icon type="ios-navigate"></Icon>
-                            预约确认
-                        </MenuItem>
-                        <MenuItem name="号别维护">
-                            <Icon type="ios-keypad"></Icon>
-                            号别维护
-                        </MenuItem>
-                        <MenuItem name="出诊安排">
-                            <Icon type="ios-analytics"></Icon>
-                            出诊安排
-                        </MenuItem>
-                        <MenuItem name="号表生成">
+                        <Submenu name="appointManager">
+                            <template slot="title">
+                                <Icon type="stats-bars"></Icon>
+                                挂号管理
+                            </template>
+                            <MenuItem name="appointConfirm">
+                                <Icon type="ios-navigate"></Icon>
+                                预约确认
+                            </MenuItem>
+                            <MenuItem name="clinicIndex">
+                                <Icon type="ios-keypad"></Icon>
+                                号别维护
+                            </MenuItem>
+                            <MenuItem name="clinicSchedule">
+                                <Icon type="ios-analytics"></Icon>
+                                出诊安排
+                            </MenuItem>
+                            <MenuItem name="clinicRegister">
+                                <Icon type="ios-paper"></Icon>
+                                号表生成
+                            </MenuItem>
+                        </Submenu>
+                        <MenuItem name="userManager">
                             <Icon type="ios-paper"></Icon>
-                            号表生成
+                            用户管理
                         </MenuItem>
+                        <Submenu name="clinicPay">
+                            <template slot="title">
+                                <Icon type="ios-paper"></Icon>
+                                诊间支付
+                            </template>
+                        </Submenu>
+                        <MenuItem name="logout">
+                            <Icon type="ios-paper"></Icon>
+                            登出
+                        </MenuItem>
+
                     </div>
                 </Menu>
             </Header>
@@ -58,11 +80,19 @@
                     <router-view></router-view>
                 </Card>
             </Content>
-            <Footer class="layout-footer-center" style="text-align: center">2011-2016 &copy; 空腔医院</Footer>
+            <Footer class="layout-footer-center" style="text-align: center">2011-2016 &copy; 口腔医院</Footer>
         </Layout>
     </div>
 </template>
 <script>
+    import util from "../libs/util";
+    let menuRouters = {
+        clinicIndex: '/index/clinic-index',
+        clinicSchedule: '/index/clinic-schedule',
+        appointConfirm: '/index/appoint-confirm',
+        clinicRegister: '/index/appoint-register',
+        userManager: '/index/user-manager'
+    };
     export default {
         data() {
             return {
@@ -75,28 +105,38 @@
         },
         created: function () {
             this.fullHeight = document.documentElement.clientHeight;
-            this.cardStyle['min-height']=(this.fullHeight - 180)+'px';
-            let that = this ;
+            this.cardStyle['min-height'] = (this.fullHeight - 180) + 'px';
+            let that = this;
             window.onresize = function (event) {
                 that.fullHeight = document.documentElement.clientHeight;
                 console.log(that.fullHeight);
-                that.cardStyle['min-height']=(that.fullHeight - 180)+'px'
+                that.cardStyle['min-height'] = (that.fullHeight - 180) + 'px'
             };
         },
         methods: {
-            menuSelect:function(menuName){
-
-                if(menuName=='号别维护'){
-                    this.$router.push("/index/clinic-index")
-                }else if(menuName=='出诊安排'){
-                    this.$router.push("/index/clinic-schedule")
-                }else if(menuName=='预约确认'){
-                    this.$router.push("/index/appoint-confirm")
-                }else if(menuName=='号表生成'){
-                    this.$router.push("/index/clinic-register")
-                }else{
-
+            menuSelect: function (menuName) {
+                let vm = this;
+                if (menuName == "logout") {
+                    util.ajax.post("api/user/logout").then(function (res) {
+                        console.log(res);
+                        vm.$router.push("/");
+                    })
+                } else {
+                    vm.$router.push(menuRouters[menuName]);
                 }
+
+
+//                if(menuName=='clinicIndex'){
+//                    this.$router.push("/index/clinic-index")
+//                }else if(menuName=='clinicSchedule'){
+//                    this.$router.push("/index/clinic-schedule")
+//                }else if(menuName=='appointConfirm'){
+//                    this.$router.push("/index/appoint-confirm")
+//                }else if(menuName=='clinicRegister'){
+//                    this.$router.push("/index/clinic-register")
+//                }else if(menuName=="userManager"){
+//                    this.$router.push("/index/clinic-register")
+//                }
             }
         }
     };

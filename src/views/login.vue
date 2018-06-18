@@ -23,8 +23,8 @@
                             </Input>
                         </FormItem>
                         <FormItem>
-                            <Input type="text" v-model="userModel.password" placeholder="请输入密码">
-                             <Icon type="ios-person-outline" slot="prepend"></Icon>
+                            <Input type="password" v-model="userModel.password" placeholder="请输入密码">
+                            <Icon type="ios-locked-outline" slot="prepend"></Icon>
                             </Input>
                         </FormItem>
                         <form-item>
@@ -39,6 +39,7 @@
 <script>
     import ICol from 'iview/src/components/grid/col';
     import FormItem from 'iview/src/components/form/form-item';
+    import util from '../libs/util'
 
     export default {
         data () {
@@ -54,7 +55,17 @@
             ICol},
         methods: {
             loginHandel:function(){
-                this.$router.push('/index');
+                let vm = this;
+                util.ajax.post("api/user/login", vm.userModel).then(function (res) {
+                    console.log(res);
+                    if (res && res.data&&res.data.dbUser == vm.userModel.user.toUpperCase()) {
+                        vm.$router.push('/index');
+                    }else {
+                        vm.$Message.error("登录失败！");
+                    }
+                }).catch(function(res) {
+                    vm.$Message.error("登录失败！");
+                });
             }
         }
     };
