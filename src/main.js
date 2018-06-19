@@ -94,7 +94,7 @@ Util.ajax.get("api/comm/get-time-interval").then(res=>{
 });
 
 
-new Vue({
+window.vueMain = new Vue({
     el: '#app',
     router: router,
     store: store,

@@ -1,5 +1,6 @@
 const routers = [{
     path: '/',
+    name:'login',
     meta: {
         title: '预约确认与号表安排系统'
     },
