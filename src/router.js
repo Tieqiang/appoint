@@ -42,6 +42,12 @@ const routers = [{
                 title:"主界面-用户管理"
             },
             component:(resolve)=>require(['./views/user-manager.vue'],resolve)
+        },{
+            path:'clinic-pay',
+            meta:{
+                title:"主界面-扫码支付"
+            },
+            component:(resolve)=>require(['./views/clinic-pay.vue'],resolve)
         }
     ]
 }];

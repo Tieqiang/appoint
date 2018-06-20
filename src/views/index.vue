@@ -66,6 +66,10 @@
                                 <Icon type="ios-paper"></Icon>
                                 诊间支付
                             </template>
+                            <MenuItem name="clinicPay">
+                                <Icon type="ios-paper"></Icon>
+                                扫码支付
+                            </MenuItem>
                         </Submenu>
                         <MenuItem name="logout">
                             <Icon type="ios-paper"></Icon>
@@ -91,7 +95,8 @@
         clinicSchedule: '/index/clinic-schedule',
         appointConfirm: '/index/appoint-confirm',
         clinicRegister: '/index/appoint-register',
-        userManager: '/index/user-manager'
+        userManager: '/index/user-manager',
+        clinicPay:'/index/clinic-pay'
     };
     export default {
         data() {

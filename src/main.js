@@ -7,13 +7,13 @@ import Util from './libs/util';
 import App from './app.vue';
 import 'iview/dist/styles/iview.css';
 
+import "./libs/filter";
 
 
 Vue.use(VueRouter);
 Vue.use(Vuex);
 
 Vue.use(iView);
-
 
 
 // 路由配置
@@ -36,61 +36,57 @@ router.afterEach(() => {
 
 const store = new Vuex.Store({
     state: {
-        users:[],
-        titleDicts:[],
-        depts:[],
-        clinicIndexes:[],
-        timeIntervals:[]
+        users: [],
+        titleDicts: [],
+        depts: [],
+        clinicIndexes: [],
+        timeIntervals: []
     },
-    getters: {
-
-    },
+    getters: {},
     mutations: {
-        setUsers:function(state,users){
+        setUsers: function (state, users) {
             state.users = users;
         },
-        setTitleDicts:function(state,titleDicts){
+        setTitleDicts: function (state, titleDicts) {
             state.titleDicts = titleDicts;
         },
-        setDepts:function(state,depts){
+        setDepts: function (state, depts) {
             state.depts = depts;
         },
-        setClinicIndex(state,clinicIndexes){
-            state.clinicIndexes = clinicIndexes ;
+        setClinicIndex(state, clinicIndexes) {
+            state.clinicIndexes = clinicIndexes;
         },
-        setTimeIntervals(state,timeIntervals){
+        setTimeIntervals(state, timeIntervals) {
             state.timeIntervals = timeIntervals;
         },
-        addClinicIndex(state,clinicIndex){
+        addClinicIndex(state, clinicIndex) {
             state.clinicIndexes.push(clinicIndex);
         }
     },
-    actions: {
-
-    }
+    actions: {}
 });
 
 //设置职称字典信息
-Util.ajax.get("api/comm/get-title-dict").then(res=>{
+Util.ajax.get("api/comm/get-title-dict").then(res => {
     store.commit("setTitleDicts", res.data);
 });
 //设置医生信息
-Util.ajax.get("api/comm/get-user-info").then(res=>{
-    store.commit("setUsers",res.data)
+Util.ajax.get("api/comm/get-user-info").then(res => {
+    store.commit("setUsers", res.data)
 })
 //设置科室信息
-Util.ajax.get("api/comm/get-dept-info").then(res=>{
-    store.commit("setDepts",res.data)
+Util.ajax.get("api/comm/get-dept-info").then(res => {
+    store.commit("setDepts", res.data)
 })
 //设置号别信息
-Util.ajax.get("api/clinic-index/get-all-clinic-index").then(res=>{
-    store.commit("setClinicIndex",res.data)
+Util.ajax.get("api/clinic-index/get-all-clinic-index").then(res => {
+    store.commit("setClinicIndex", res.data)
 });
 
 //设置号别时间安排
-Util.ajax.get("api/comm/get-time-interval").then(res=>{
+Util.ajax.get("api/comm/get-time-interval").then(res => {
     console.log(res.data);
-    store.commit("setTimeIntervals",res.data)
+    store.commit("setTimeIntervals", res.data)
 });
 
 

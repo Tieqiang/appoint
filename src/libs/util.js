@@ -32,6 +32,11 @@ util.ajax.interceptors.response.use((response) => {
     return response;
 });
 
+util.kingdeeAjax = axios.create({
+    baseURL: "http://ip:port/interface-service-v3/mobileApi?service=",
+    timeout: 60000,
+});
+
 
 
 export default util;
