@@ -4,14 +4,14 @@
             v-model="myValue"
             @on-visible-change="visibleChanged"
     >
-        <Form :label-width="80">
+        <Form :label-width="80" ref="formPay" :rules="rulesValidate" :model="pay">
             <FormItem label="支付方式">
-                <RadioGroup v-model="pay.payWay">
+                <RadioGroup v-model="pay.payMode">
                     <Radio label="9801">微信</Radio>
                     <Radio label="9901">支付宝</Radio>
                 </RadioGroup>
             </FormItem>
-            <FormItem label="付款码">
+            <FormItem label="付款码" prop="authCode">
                 <Input v-model="pay.authCode"></Input>
             </FormItem>
         </Form>
@@ -38,9 +38,12 @@
         data() {
             return {
                 pay: {
-                    payWay: '9801',
+                    payMode: '9801',
                     authCode: ''
                 },//默认微信支付
+                rulesValidate:{
+                    authCode:{required:true,message:'付款码不能为空！',trigger:'blur'}
+                }
             };
         },
         methods: {
@@ -52,14 +55,18 @@
             },
             init() {
                 this.pay = {
-                    payWay: '9801',
+                    payMode: '9801',
                     authCode: ''
                 };
             },
             ok() {
                 let vm = this;
-                vm.$emit("ok", vm.pay);
-                vm.myValue = false;
+                vm.$refs.formPay.validate(valid=> {
+                    if(valid) {
+                        vm.$emit("ok", vm.pay);
+                        vm.myValue = false;
+                    }
+                })
             }
         },
         mounted: function () {

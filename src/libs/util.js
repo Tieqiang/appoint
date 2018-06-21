@@ -24,11 +24,10 @@ util.ajax = axios.create({
 });
 util.ajax.interceptors.response.use((response) => {
     if (response.data && response.data.error) {
+        window.vueMain.$Message.error(response.data.error);
         if (response.data.error == "您还未登录系统！") {
-            window.vueMain.$Message.error(response.data.error);
             window.vueMain.$router.push({name: 'login'});
         }
-    }
     return response;
 });
 

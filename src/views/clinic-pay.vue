@@ -22,7 +22,7 @@
             ></Table>
         </Card>
         </Col>
-        <Col span="18">
+        <Col style="padding-left:15px;" span="18">
         <Card>
             <p slot="title">待缴费项目</p>
             <p slot="extra">
@@ -30,25 +30,43 @@
                     扫码支付
                 </Button>
             </p>
+            <Form :label-width="80">
+                <Row>
+                    <Col span="12">
+                    <FormItem label="待缴费项目">
+                        {{totalInfo.amount}}
+                    </FormItem>
+                    </Col>
+                    <Col span="12">
+                    <FormItem label="待缴费金额">
+                        {{totalInfo.costs}}
+                    </FormItem>
+                    </Col>
+                </Row>
+            </Form>
             <Table
                     :columns="payInfoColumns"
                     :data="payInfoList"
+                    height="500"
             ></Table>
         </Card>
         </Col>
-        <selectPayWay v-model="isShowPayWay"></selectPayWay>
+        <selectPayMode
+                v-model="isShowPayWay"
+                @ok="ok"
+        ></selectPayMode>
     </Row>
 </template>
 <script>
     import util from "../libs/util";
 
-    import selectPayWay from "./template/select-pay-way.vue";
+    import selectPayMode from "./template/select-pay-mode.vue";
 
     let dateFilter = window.Vue.filter("date");
     export default {
         name: 'clinic-pay',
         components:{
-            selectPayWay
+            selectPayMode
         },
         data() {
             return {
@@ -97,7 +115,11 @@
                         key:'costs'
                     }
                 ],
-                payInfoList:[]
+                payInfoList:[],
+                totalInfo:{
+                    amount:0,
+                    costs:0
+                }
 
             }
         },
@@ -119,13 +141,34 @@
             },
             patientClicked(clinicMaster,index) {
                 let vm = this;
+                //清空总费用信息
+                vm.totalInfo={
+                    amount:0,
+                    costs:0
+                }
+                vm.payInfoList = [];//清空未支付费用列表信息
                 let query = {visitDate: clinicMaster.visitDate, visitNo: clinicMaster.visitNo};
                 util.ajax.post("api/clinic-pay/get-unpayed-info",query).then(function(res) {
                     if (res && res.data) {
                         vm.payInfoList = res.data;
-                    } else {
-                        vm.payInfoList = [];
-
+                        for (let item of vm.payInfoList) {
+                            vm.totalInfo.amount += 1;
+                            vm.totalInfo.costs += item.costs;
+                        }
+                    }
+                })
+            },
+            ok({authCode,payMode}) {
+                let vm = this;
+                let serialSet = new Set();
+                for(let item of vm.payInfoList) {
+                    serialSet.add(item.serialNo);
+                }
+                let query = {authCode,payMode};
+                query.serialNo = serialSet[0];
+                util.ajax.post("api/clinic-pay/pay",query).then(function(res) {
+                    if(res&&res.data&&res.data==0) {
+                        vm.$Message.success("付款成功！");
                     }
                 })
             }
