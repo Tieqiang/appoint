@@ -16,21 +16,24 @@
             <i-col>
                 <Card>
                     <p slot="title" style="text-align: center">预约确认与挂号安排系统</p>
-                    <i-form>
-                        <FormItem>
-                            <Input type="text" v-model="userModel.user" placeholder="请输入用户名">
-                            <Icon type="ios-person-outline" slot="prepend"></Icon>
-                            </Input>
-                        </FormItem>
-                        <FormItem>
-                            <Input type="password" v-model="userModel.password" placeholder="请输入密码">
-                            <Icon type="ios-locked-outline" slot="prepend"></Icon>
-                            </Input>
-                        </FormItem>
-                        <form-item>
-                            <Button type="primary" long @click="loginHandel()">登录</Button>
-                        </form-item>
-                    </i-form>
+                    <div @keydown.enter="loginHandel">
+
+                        <i-form >
+                            <FormItem>
+                                <Input type="text" v-model="userModel.user" placeholder="请输入用户名">
+                                <Icon type="ios-person-outline" slot="prepend"></Icon>
+                                </Input>
+                            </FormItem>
+                            <FormItem>
+                                <Input type="password" v-model="userModel.password" placeholder="请输入密码">
+                                <Icon type="ios-locked-outline" slot="prepend"></Icon>
+                                </Input>
+                            </FormItem>
+                            <form-item>
+                                <Button type="primary" long @click="loginHandel">登录</Button>
+                            </form-item>
+                        </i-form>
+                    </div>
                 </Card>
             </i-col>
         </Row>

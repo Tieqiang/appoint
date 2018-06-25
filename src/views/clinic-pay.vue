@@ -26,7 +26,7 @@
         <Card>
             <p slot="title">待缴费项目</p>
             <p slot="extra">
-                <Button type="primary" size="small" @click="isShowPayWay=true">
+                <Button type="primary" size="small" @click="pay">
                     扫码支付
                 </Button>
             </p>
@@ -34,26 +34,32 @@
                 <Row>
                     <Col span="12">
                     <FormItem label="待缴费项目">
-                        {{totalInfo.amount}}
+                        {{totalCount}}
                     </FormItem>
                     </Col>
                     <Col span="12">
                     <FormItem label="待缴费金额">
-                        {{totalInfo.costs}}
+                        {{totalCosts|currency}}
                     </FormItem>
                     </Col>
                 </Row>
             </Form>
             <Table
+                    border
                     :columns="payInfoColumns"
                     :data="payInfoList"
                     height="500"
+                    @on-select="payInfoSelected"
+                    @on-select-cancel="payInfoSelectCanceled"
+                    @on-select-all="selectAll"
+                    @on-selection-change="payInfoSelectChanged"
             ></Table>
         </Card>
         </Col>
         <selectPayMode
                 v-model="isShowPayWay"
                 @ok="ok"
+                :costs="totalCosts"
         ></selectPayMode>
     </Row>
 </template>
@@ -63,14 +69,35 @@
     import selectPayMode from "./template/select-pay-mode.vue";
 
     let dateFilter = window.Vue.filter("date");
+    let currencyFilter = window.Vue.filter("currency");
     export default {
         name: 'clinic-pay',
-        components:{
+        components: {
             selectPayMode
+        },
+        computed: {
+            totalCount: function () {
+                let count = 0;
+                for (let item of this.payInfoList) {
+                    if (item._checked) {
+                        count++;
+                    }
+                }
+                return count;
+            },
+            totalCosts: function () {
+                let costs = 0;
+                for (let item of this.payInfoList) {
+                    if (item._checked) {
+                        costs += item.costs;
+                    }
+                }
+                return costs;
+            }
         },
         data() {
             return {
-                isShowPayWay:false,
+                isShowPayWay: false,
                 query: {},
                 clinicMasterColumns: [
                     {
@@ -80,7 +107,7 @@
                     {
                         title: '就诊日期',
                         key: 'visitDate',
-                        render:(h,params)=> {
+                        render: (h, params) => {
                             return h("div", dateFilter(params.row.visitDate));
                         }
                     },
@@ -93,37 +120,74 @@
                 clinicMasterRules: {
                     patientId: [{required: 'true', message: '就诊卡号不能为空！', trigger: 'blur'}]
                 },
-                payInfoColumns:[
+                payInfoColumns: [
                     {
-                        title:'项目名称',
-                        key:'itemName'
+                        title: '选择',
+                        type: 'selection',
+                        width: 50
                     },
                     {
-                        title:'规格',
-                        key:'spec'
+                        title: '处方号',
+                        render: (h, params) => {
+                            return h("div", params.row.id.serialNo);
+                        }
                     },
                     {
-                        title:'单位',
-                        key:'units'
+                        title: '项目名称',
+                        key: 'itemName'
                     },
                     {
-                        title:'数量',
-                        key:'amount'
+                        title: '规格',
+                        key: 'spec'
                     },
                     {
-                        title:'金额',
-                        key:'costs'
+                        title: '单位',
+                        key: 'units'
+                    },
+                    {
+                        title: '数量',
+                        key: 'amount'
+                    },
+                    {
+                        title: '金额',
+                        key: 'costs',
+                        render:(h,params)=> {
+                            return h("div", currencyFilter(params.row.costs));
+                        }
                     }
                 ],
-                payInfoList:[],
-                totalInfo:{
-                    amount:0,
-                    costs:0
-                }
-
+                payInfoList: [],
             }
         },
         methods: {
+            payInfoSelectChanged(selection) {
+              if(selection.length==0) {
+                  //取消全选的情况
+                  for (let item of this.payInfoList) {
+                      this.$set(item, '_checked', false);
+                  }
+              }
+            },
+            selectAll(selection) {
+                //由于select-all事件不会触发组件刷新，故添加以下事件强行触发
+                for (let item of this.payInfoList) {
+                    this.$set(item, '_checked', true);
+                }
+            },
+            payInfoSelected(selection, row) {
+                for (let item of this.payInfoList) {
+                    if (item.id.serialNo == row.id.serialNo) {
+                        this.$set(item, '_checked', true);
+                    }
+                }
+            },
+            payInfoSelectCanceled(selection, row) {
+                for (let item of this.payInfoList) {
+                    if (item.id.serialNo == row.id.serialNo) {
+                        this.$set(item, '_checked', false);
+                    }
+                }
+            },
             getClinicMasterList() {
                 let vm = this;
                 vm.$refs.formQuery.validate(valid => {
@@ -139,35 +203,36 @@
                     }
                 })
             },
-            patientClicked(clinicMaster,index) {
+            patientClicked(clinicMaster, index) {
                 let vm = this;
-                //清空总费用信息
-                vm.totalInfo={
-                    amount:0,
-                    costs:0
-                }
                 vm.payInfoList = [];//清空未支付费用列表信息
                 let query = {visitDate: clinicMaster.visitDate, visitNo: clinicMaster.visitNo};
-                util.ajax.post("api/clinic-pay/get-unpayed-info",query).then(function(res) {
+                util.ajax.post("api/clinic-pay/get-unpayed-info", query).then(function (res) {
                     if (res && res.data) {
                         vm.payInfoList = res.data;
-                        for (let item of vm.payInfoList) {
-                            vm.totalInfo.amount += 1;
-                            vm.totalInfo.costs += item.costs;
-                        }
                     }
                 })
             },
-            ok({authCode,payMode}) {
-                let vm = this;
-                let serialSet = new Set();
-                for(let item of vm.payInfoList) {
-                    serialSet.add(item.serialNo);
+            pay() {
+                if(this.totalCosts==0) {
+                    this.$Message.error("没有需要支付的收费项目！");
+                    return;
                 }
-                let query = {authCode,payMode};
-                query.serialNo = serialSet[0];
-                util.ajax.post("api/clinic-pay/pay",query).then(function(res) {
-                    if(res&&res.data&&res.data==0) {
+                this.isShowPayWay = true;
+            },
+            ok({authCode, payMode}) {
+                let vm = this;
+                let query = {authCode, payMode};
+                let serialSet = new Set();
+                for (let item of vm.payInfoList) {
+                    if(item._checked) {
+                        serialSet.add(item.id.serialNo);
+                    }
+                }
+                query.serialNoList = Array.from(serialSet);
+                console.log(query);
+                util.ajax.post("api/clinic-pay/pay", query).then(function (res) {
+                    if (res && res.data && res.data == 0) {
                         vm.$Message.success("付款成功！");
                     }
                 })

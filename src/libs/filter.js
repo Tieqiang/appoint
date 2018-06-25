@@ -8,6 +8,12 @@ Vue.filter("date", function (input, fullTime) {
     return new moment(input).format(formatString);
 
 });
+Vue.filter("currency",function(input){
+    if(input==undefined||input==null) {
+        input = 0;
+    }
+    return parseInt(input).toFixed(2);
+});
 
 window.Vue=Vue;
 export default{};

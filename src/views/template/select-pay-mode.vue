@@ -5,6 +5,9 @@
             @on-visible-change="visibleChanged"
     >
         <Form :label-width="80" ref="formPay" :rules="rulesValidate" :model="pay">
+            <FormItem label="总金额">
+                <span style="color: red;font-size: 16px;">{{costs|currency}}</span>
+            </FormItem>
             <FormItem label="支付方式">
                 <RadioGroup v-model="pay.payMode">
                     <Radio label="9801">微信</Radio>
@@ -34,7 +37,7 @@
                 }
             }
         },
-        props: ["value"],
+        props: ["value","costs"],
         data() {
             return {
                 pay: {

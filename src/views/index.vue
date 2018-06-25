@@ -114,7 +114,7 @@
             let that = this;
             window.onresize = function (event) {
                 that.fullHeight = document.documentElement.clientHeight;
-                console.log(that.fullHeight);
+//                console.log(that.fullHeight);
                 that.cardStyle['min-height'] = (that.fullHeight - 180) + 'px'
             };
         },
