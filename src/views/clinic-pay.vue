@@ -129,7 +129,7 @@
                     {
                         title: '处方号',
                         render: (h, params) => {
-                            return h("div", params.row.id.serialNo);
+                            return h("div", params.row.id.serialNo+"|"+params.row.id.orderClass+"|"+params.row.id.orderNo);
                         }
                     },
                     {
@@ -176,14 +176,16 @@
             },
             payInfoSelected(selection, row) {
                 for (let item of this.payInfoList) {
-                    if (item.id.serialNo == row.id.serialNo) {
+                    console.log(item.id);
+                    console.log(row.id);
+                    if (item.id.serialNo == row.id.serialNo&&item.id.orderClass==row.id.orderClass&&item.id.orderNo==row.id.orderNo) {
                         this.$set(item, '_checked', true);
                     }
                 }
             },
             payInfoSelectCanceled(selection, row) {
                 for (let item of this.payInfoList) {
-                    if (item.id.serialNo == row.id.serialNo) {
+                    if (item.id.serialNo == row.id.serialNo&&item.id.orderClass==row.id.orderClass&&item.id.orderNo==row.id.orderNo) {
                         this.$set(item, '_checked', false);
                     }
                 }
@@ -226,7 +228,7 @@
                 let serialSet = new Set();
                 for (let item of vm.payInfoList) {
                     if(item._checked) {
-                        serialSet.add(item.id.serialNo);
+                        serialSet.add(item.id.serialNo+"|"+item.id.orderClass+"|"+item.id.orderNo);
                     }
                 }
                 query.serialNoList = Array.from(serialSet);
