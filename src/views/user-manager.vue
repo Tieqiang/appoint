@@ -32,6 +32,8 @@
     import util from "../libs/util";
     import addUser from "./template/add-user.vue";
 
+    let deptFilter = window.Vue.filter("dept");
+
     export default {
         name: 'user-manage',
         components: {
@@ -77,9 +79,9 @@
                     {
                         title: '科室',
                         key: 'deptCode',
-//                        render:(h,params)=> {
-//                            return h("div",dictFilter(params.row.dept,this.deptDict))
-//                        }
+                        render:(h,params)=> {
+                            return h("div",deptFilter(params.row.deptCode,this.deptDict))
+                        }
                     }
 
                 ],
@@ -118,6 +120,9 @@
         },
         mounted:function() {
             let vm = this;
+            util.ajax.get("api/clinic-pay/dept-dict").then(function(res) {
+                vm.deptDict = res.data;
+            })
 //            invokeSrv.getFnData(dictSrv.getDeptDict,null,function(data) {
 //                vm.deptDict = data;
 //            })

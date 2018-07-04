@@ -17,7 +17,15 @@
             </Row>
             <Row>
                 <FormItem label="科室" prop="deptCode">
-                    <Input v-model="myUser.deptCode"></Input>
+                    <Select filterable
+                            @on-change="handleSelect"
+                            v-model="myUser.deptCode"
+                    >
+                        <Option v-for="item in deptDict" :label="item.deptName" :value="item.deptCode" :key="item.deptCode">
+                            <span style="font-size: 8px">{{item.deptName}}</span>
+                            <span style="color:#ccc;font-size: 5px; text-align: right">{{item.inputCode}}</span>
+                        </Option>
+                    </Select>
                 </FormItem>
             </Row>
             <Row>
@@ -63,7 +71,8 @@
                     dbUser: [{required: true, message: '用户名不能为空!', trigger: 'blur'}],
                     name: [{required: true, message: '姓名不能为空!', trigger: 'blur'}],
                     deptCode: [{required: true, message: '科室不能为空!', trigger: 'blur'}],
-                }
+                },
+                deptDict:[]
             }
         },
         methods: {
@@ -73,9 +82,15 @@
                     this.init();
                 }
             },
+            handleSelect: function (value) {
+                this.myUser.deptCode = value;
+            },
             init() {
                 let vm = this;
                 vm.myUser = Object.assign({}, vm.user,{password:''});
+                util.ajax.get("api/clinic-pay/dept-dict").then(function (res) {
+                    vm.deptDict = res.data;
+                });
 //                invokeSrv.getFnData(dictSrv.getPharmModuleDict, null, function (data) {
 //                    vm.moduleDict = data;
 //                });

@@ -14,6 +14,16 @@ Vue.filter("currency",function(input){
     }
     return parseInt(input).toFixed(2);
 });
+Vue.filter("dept",function(input,deptDict){
+    if(input==undefined||input==null||deptDict==null) {
+        return input;
+    }
+    for(let item of deptDict) {
+        if(item.deptCode==input) {
+            return item.deptName;
+        }
+    }
+});
 
 window.Vue=Vue;
 export default{};
