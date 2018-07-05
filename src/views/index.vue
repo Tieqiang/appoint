@@ -44,6 +44,18 @@
                                 <Icon type="ios-navigate"></Icon>
                                 预约确认
                             </MenuItem>
+                            <MenuItem name="timeShift">
+                                <Icon type="ios-information"></Icon>
+                                班别维护
+                            </MenuItem>
+                            <MenuItem name="timeInterval">
+                                <Icon type="ios-cloud"></Icon>
+                                时段维护
+                            </MenuItem>
+                            <MenuItem name="clinicType">
+                                <Icon type="ios-cloud"></Icon>
+                                号类维护
+                            </MenuItem>
                             <MenuItem name="clinicIndex">
                                 <Icon type="ios-keypad"></Icon>
                                 号别维护
@@ -55,6 +67,10 @@
                             <MenuItem name="clinicRegister">
                                 <Icon type="ios-paper"></Icon>
                                 号表生成
+                            </MenuItem>
+                            <MenuItem name="stopStartClinic">
+                                <Icon type="ios-paper"></Icon>
+                                号表调整
                             </MenuItem>
                         </Submenu>
                         <MenuItem name="userManager">
@@ -90,13 +106,18 @@
 </template>
 <script>
     import util from "../libs/util";
+    import Cookies from 'js-cookie';
     let menuRouters = {
         clinicIndex: '/index/clinic-index',
         clinicSchedule: '/index/clinic-schedule',
         appointConfirm: '/index/appoint-confirm',
-        clinicRegister: '/index/appoint-register',
+        clinicRegister: '/index/clinic-register',
         userManager: '/index/user-manager',
-        clinicPay:'/index/clinic-pay'
+        clinicPay:'/index/clinic-pay',
+        timeShift:'/index/time-shift',
+        timeInterval:'/index/time-interval',
+        clinicType:'/index/clinic-type',
+        stopStartClinic:"/index/stop-start-register"
     };
     export default {
         data() {
@@ -114,7 +135,6 @@
             let that = this;
             window.onresize = function (event) {
                 that.fullHeight = document.documentElement.clientHeight;
-//                console.log(that.fullHeight);
                 that.cardStyle['min-height'] = (that.fullHeight - 180) + 'px'
             };
         },
@@ -123,25 +143,13 @@
                 let vm = this;
                 if (menuName == "logout") {
                     util.ajax.post("api/user/logout").then(function (res) {
-                        console.log(res);
                         vm.$router.push("/");
+                        vm.$store.commit("setLoginUser","");
+                        Cookies.remove("currentUser");
                     })
                 } else {
                     vm.$router.push(menuRouters[menuName]);
                 }
-
-
-//                if(menuName=='clinicIndex'){
-//                    this.$router.push("/index/clinic-index")
-//                }else if(menuName=='clinicSchedule'){
-//                    this.$router.push("/index/clinic-schedule")
-//                }else if(menuName=='appointConfirm'){
-//                    this.$router.push("/index/appoint-confirm")
-//                }else if(menuName=='clinicRegister'){
-//                    this.$router.push("/index/clinic-register")
-//                }else if(menuName=="userManager"){
-//                    this.$router.push("/index/clinic-register")
-//                }
             }
         }
     };

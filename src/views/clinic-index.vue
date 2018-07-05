@@ -1,31 +1,22 @@
 <template>
     <div>
-        <Form inline>
-            <FormItem>
-                <Select style="width:300px" v-model="selectDept" filterable>
+        <Card :bordered="false" :dis-hover="true">
+            <p slot="title">号别维护</p>
+            <div slot="extra" style="width: 500px">
+                <Select style="width:150px" v-model="selectDept" filterable >
                     <Option value="">--请选择---</Option>
                     <Option v-for="dept in depts" :value="dept.deptId" :key="dept.deptName" >{{dept.deptName}}</Option>
                 </Select>
-            </FormItem>
-            <FormItem>
-                <Select style="width: 300px;" v-model="selectUser" filterable>
-                    <Option value="">--请选择---</Option>
-                    <Option v-for="user in users" :value="user.userId" :key="user.userId">{{user.userName}}</Option>
-                </Select>
-            </FormItem>
-            <FormItem>
-                <Input type="text" placeholder="请输入拼音码检索" v-model="inputCode" ></Input>
-            </FormItem>
+                <ButtonGroup>
+                    <Button type="primary" @click="searchClinicIndex">查询</Button>
+                    <Button type="success" @click="addClinicIndex">添加号别</Button>
+                    <Button type="info" @click="modifyIndex">修改号别</Button>
+                    <Button type="warning" @click="deleteIndex">删除号别</Button>
+                </ButtonGroup>
+            </div>
 
-            <FormItem>
-                <Button type="primary" @click="searchClinicIndex">查询</Button>
-                <Button type="success" @click="addClinicIndex">添加号别</Button>
-                <Button type="info" @click="modifyIndex">修改号别</Button>
-                <Button type="warning" @click="deleteIndex">删除号别</Button>
-            </FormItem>
-        </Form>
-        <Table border highlight-row ref="currentRowTable" @on-current-change="selectChange":loading="loading" :columns="clinicIndexCols" :data="clinicIndexes"></Table>
-
+            <Table border highlight-row ref="currentRowTable" @on-current-change="selectChange":loading="loading" :columns="clinicIndexCols" :data="clinicIndexes"></Table>
+        </Card>
         <Modal title="号别维护" v-model="modifyClinicIndex" :closable="false" :mask-closable="false"
                @on-ok="mergeClinicIndex"
                :width="40">
@@ -34,12 +25,19 @@
                     <Input v-model="currentClinicIndex.clinicLabel" :disabled="modifyFlag"></Input>
                 </FormItem>
                 <FormItem label="号类名称">
-                    <Input v-model="currentClinicIndex.clinicType"></Input>
+                    <Select v-model="currentClinicIndex.clinicType" @on-change="clinicTypeChange">
+                        <Option v-for="clinicType in clinicTypes" :value="clinicType.clinicType">{{clinicType.clinicType}}</Option>
+                    </Select>
                 </FormItem>
                 <FormItem label="拼音简码">
                     <Input v-model="currentClinicIndex.inputCode"></Input>
                 </FormItem>
-
+                <FormItem label="挂号费">
+                    <Input v-model="currentClinicIndex.registerFee" disabled></Input>
+                </FormItem>
+                <FormItem label="诊疗费">
+                    <Input v-model="currentClinicIndex.clinicFee" disabled></Input>
+                </FormItem>
                 <FormItem label="科室">
                     <Select  v-model="currentClinicIndex.clinicDept" filterable>
                         <Option value="">--请选择---</Option>
@@ -119,6 +117,12 @@
                   title:"输入码",
                   key:"inputCode"
               },{
+                  title:"诊疗费",
+                  key:"clinicFee"
+              },{
+                  title:"挂号费",
+                  key:"registerFee"
+              },{
                   title:"出诊安排",
                   key:"inputCode",
                   render:(h,param)=>{
@@ -152,18 +156,37 @@
                   doctor:'',
                   clinicDept:'',
                   clinicLabel:'',
-                  clinicType:''
+                  clinicType:'',
+                  registerFee:0,
+                  clinicFee:0
               },
-              addFlag:false
+              addFlag:false,
+              clinicTypes:[],
+              currentClinicType:{
+                  serialNo:"",
+                  clinicType:"",
+                  tradePrice:"",
+                  registPrice:"",
+                  price:""
+              }
           }
         },
         created:function(){
             this.init();
             this.depts = this.$store.state.depts;
             this.users=this.$store.state.users;
-            console.log(this.depts)
         },
         methods:{
+            clinicTypeChange:function(row){
+                console.log(row);
+                this.currentClinicType = row ;
+                for(let item in this.clinicTypes){
+                    if(this.clinicTypes[item].clinicType ==row){
+                        this.currentClinicIndex.registerFee = this.clinicTypes[item].registPrice ;
+                        this.currentClinicIndex.clinicFee = this.clinicTypes[item].tradePrice ;
+                    }
+                }
+            },
             init:function(){
                 // this.loadClinicIndex();
                 if(this.users.length==0){
@@ -175,8 +198,13 @@
                 }
 
                 this.loadDoctorTitle();
+                this.loadAllClinicTypes();
             },
-
+            loadAllClinicTypes:function(){
+                util.ajax.get("api/clinic-type/list-all").then((res)=>{
+                    this.clinicTypes = res.data ;
+                })
+            },
             loadUsers:function(){
                 util.ajax.get("api/comm/get-user-info").then(res=>{
                     this.users= res.data;
@@ -227,6 +255,7 @@
                 for(let key in this.currentClinicIndex){
                     this.currentClinicIndex[key]=""
                 }
+                this.currentClinicIndex.clinicDept = this.selectDept;
                 this.modifyClinicIndex=true
                 this.modifyFlag=false
                 this.addFlag=true;

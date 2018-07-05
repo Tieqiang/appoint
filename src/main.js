@@ -6,7 +6,7 @@ import Vuex from 'vuex';
 import Util from './libs/util';
 import App from './app.vue';
 import 'iview/dist/styles/iview.css';
-
+import Cookies from 'js-cookie'
 import "./libs/filter";
 
 
@@ -23,11 +23,6 @@ const RouterConfig = {
 };
 const router = new VueRouter(RouterConfig);
 
-router.beforeEach((to, from, next) => {
-    iView.LoadingBar.start();
-    Util.title(to.meta.title);
-    next();
-});
 
 router.afterEach(() => {
     iView.LoadingBar.finish();
@@ -40,7 +35,8 @@ const store = new Vuex.Store({
         titleDicts: [],
         depts: [],
         clinicIndexes: [],
-        timeIntervals: []
+        timeIntervals: [],
+        loginUser:""
     },
     getters: {},
     mutations: {
@@ -59,8 +55,8 @@ const store = new Vuex.Store({
         setTimeIntervals(state, timeIntervals) {
             state.timeIntervals = timeIntervals;
         },
-        addClinicIndex(state, clinicIndex) {
-            state.clinicIndexes.push(clinicIndex);
+        setLoginUser(state,user){
+            state.loginUser = user ;
         }
     },
     actions: {}
@@ -78,10 +74,7 @@ Util.ajax.get("api/comm/get-user-info").then(res => {
 Util.ajax.get("api/comm/get-dept-info").then(res => {
     store.commit("setDepts", res.data)
 })
-//设置号别信息
-Util.ajax.get("api/clinic-index/get-all-clinic-index").then(res => {
-    store.commit("setClinicIndex", res.data)
-});
+
 
 //设置号别时间安排
 Util.ajax.get("api/comm/get-time-interval").then(res => {
@@ -89,6 +82,28 @@ Util.ajax.get("api/comm/get-time-interval").then(res => {
     store.commit("setTimeIntervals", res.data)
 });
 
+
+router.beforeEach((to, from, next) => {
+    iView.LoadingBar.start();
+    Util.title(to.meta.title);
+    if(to.meta.requireAuth){
+
+        if(store.state.loginUser){
+            next();
+        }else{
+            if(Cookies.get("currentUser")){
+                next();
+            }else{
+                next({
+                    path:"/",
+                    query: {redirect: to.fullPath}
+                })
+            }
+        }
+    }else{
+        next();
+    }
+});
 
 window.vueMain = new Vue({
     el: '#app',

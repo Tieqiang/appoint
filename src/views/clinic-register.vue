@@ -1,43 +1,29 @@
 <template>
     <div>
-        <Row>
-            <i-col span="18">
-                <Form inline :labelWidth="60">
-                    <FormItem label="门诊科室">
-                        <Select style="width: 200px" v-model="deptCode">
-                            <Option value="">----请选择----</Option>
-                            <Option v-for="dept in depts" :value="dept.deptId" :key="dept.deptName">{{dept.deptName}}</Option>
-                        </Select>
-                    </FormItem>
-                    <FormItem label="医生名称">
-                        <Select style="width: 200px" v-model="doctorId">
-                            <Option value="">----请选择----</Option>
-                            <Option v-for="user in users" :value="user.userId" :key="user.userId">{{user.userName}}</Option>
-                        </Select>
-                    </FormItem>
-                    <FormItem label="开始时间">
-                        <Input type="date" v-model="startTime"></Input>
-                    </FormItem>
-                    <FormItem label="结束时间">
-                        <Input type="date" v-model="endTime"></Input>
-                    </FormItem>
-                </Form>
-            </i-col>
-            <i-col span="6">
-                <Button type="success" @click="searchClinicIndex">查询</Button>
-                <Button type="info" @click="searchClinicForRegist">查询号表</Button>
-                <Button type="primary" @click="createClinicForRegist">生成号表</Button>
-                <Button type="error" @click="deleteClinicForRegist">删除号表</Button>
-            </i-col>
-        </Row>
-        <Row>
-            <i-col span="6">
-                <Table size="small" @on-selection-change="clinicIndexSelectionChange" :columns="clinicIndexCols" border :data="clinicIndexes" :height="tableHeight"></Table>
-            </i-col>
-            <i-col span="18">
-                <Table size="small" :loading="reigistLoading" @on-selection-change="clinicForRegistSelectionChange" :columns="clinicRegisterCols" border :height="tableHeight" :data="clinicRegistes"></Table>
-            </i-col>
-        </Row>
+        <Card :bordered="false" :dis-hover="true">
+            <p slot="title">号表生成</p>
+            <div slot="extra" style="width: 800px">
+                <Select style="width: 150px" v-model="deptCode" @on-change="searchClinicIndex">
+                    <Option value="">----请选择----</Option>
+                    <Option v-for="dept in depts" :value="dept.deptId" :key="dept.deptName">{{dept.deptName}}</Option>
+                </Select>
+                <Input type="date" style="width: 130px" v-model="startTime"></Input>至<Input type="date" v-model="endTime" style="width: 130px;"></Input>
+                <ButtonGroup>
+                    <Button type="success" @click="searchClinicIndex">查询</Button>
+                    <Button type="info" @click="searchClinicForRegist">查询号表</Button>
+                    <Button type="primary" @click="createClinicForRegist">生成号表</Button>
+                    <Button type="error" @click="deleteClinicForRegist">删除号表</Button>
+                </ButtonGroup>
+            </div>
+            <Row>
+                <i-col span="6">
+                    <Table size="small" @on-selection-change="clinicIndexSelectionChange" :columns="clinicIndexCols" border :data="clinicIndexes" :height="tableHeight"></Table>
+                </i-col>
+                <i-col span="18">
+                    <Table size="small" :loading="reigistLoading" @on-selection-change="clinicForRegistSelectionChange" :columns="clinicRegisterCols" border :height="tableHeight" :data="clinicRegistes"></Table>
+                </i-col>
+            </Row>
+        </Card>
     </div>
 
 </template>
@@ -150,6 +136,19 @@
 
             },
             createClinicForRegist:function(){
+                let that = this ;
+                this.$Modal.confirm({
+                    title:"生成挂号确认",
+                    content:"此操作，将会将原有的号表信息删除，并生成新的号表，确定要进行此操作吗？",
+                    onOk:function(){
+                        that.buildNewRegist();
+                    },
+                    onCancel:function(){
+
+                    }
+                })
+            },
+            buildNewRegist:function(){
                 if(!this.startTime){
                     this.$Message.error("开始时间不能为空");
                     return ;

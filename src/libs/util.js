@@ -13,7 +13,7 @@ util.title = function(title) {
 const ajaxUrl = env === 'development' ?
     'http://127.0.0.1:8090' :
     env === 'production' ?
-    'http://localhost:8080' :
+    'http://192.168.206.62:8080' :
     'http://debug.url.com';
 
 

@@ -43,7 +43,7 @@
     import ICol from 'iview/src/components/grid/col';
     import FormItem from 'iview/src/components/form/form-item';
     import util from '../libs/util'
-
+    import Cookies from 'js-cookie'
     export default {
         data () {
             return {
@@ -61,8 +61,10 @@
                 let vm = this;
                 util.ajax.post("api/user/login", vm.userModel).then(function (res) {
                     console.log(res);
-                    if (res && res.data&&res.data.dbUser == vm.userModel.user.toUpperCase()) {
+                    if (res.statusText=="OK") {
+                        vm.$store.commit("setLoginUser",res.data.dbUser);
                         vm.$router.push('/index');
+                        Cookies.set("currentUser",res.data.dbUser);
                     }else {
                         vm.$Message.error("登录失败！");
                     }

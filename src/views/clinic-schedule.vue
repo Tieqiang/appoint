@@ -1,23 +1,22 @@
 <template>
     <div>
-        <Row>
-            <i-col span="6">
-                <Select filterable v-model="currentClinicLabel">
-                    <Option v-for="clinicIndex in clinicIndexes" :value="clinicIndex.clinicLabel" :key="clinicIndex.clinicLabel">{{clinicIndex.clinicLabel}}</Option>
-                </Select>
-            </i-col>
-            <i-col span="16" offset="2">
-                <Button type="primary" @click="addClinicSchedule">添加安排</Button>
-                <Button type="info" @click="modifyClinicSchedule">修改安排</Button>
-                <Button type="warning" @click="deleteClinicSchedule">取消安排</Button>
-            </i-col>
-        </Row>
-        <br>
-        <Row>
-            <i-col span="24">
-                <Table border highlight-row ref="currentRowTable" :columns="tableColumns" :data="clinicScheduleEntities" @on-current-change="selectChange"></Table>
-            </i-col>
-        </Row>
+        <Card :bordered="false" :dis-hover="true">
+            <p slot="title">出诊安排</p>
+            <Row slot="extra">
+                <i-col span="6">
+                    <Select filterable v-model="currentClinicLabel">
+                        <Option v-for="clinicIndex in clinicIndexes" :value="clinicIndex.clinicLabel" :key="clinicIndex.clinicLabel">{{clinicIndex.clinicLabel}}</Option>
+                    </Select>
+                </i-col>
+                <i-col span="16" offset="2">
+                    <Button type="primary" @click="addClinicSchedule">添加安排</Button>
+                    <Button type="info" @click="modifyClinicSchedule">修改安排</Button>
+                    <Button type="warning" @click="deleteClinicSchedule">取消安排</Button>
+                </i-col>
+            </Row>
+            <Table border highlight-row ref="currentRowTable" :columns="tableColumns" :data="clinicScheduleEntities" @on-current-change="selectChange"></Table>
+        </Card>
+
         <Modal title="出诊安排" v-model="modifyClinicScheduleModel" :closable="false" :mask-closable="false"
                @on-ok="mergeClinicSchedule"
                :width="40">
@@ -100,11 +99,18 @@
         },
         created:function(){
             this.currentClinicLabel = this.$router.currentRoute.query.clinicLabel
-            this.clinicIndexes = this.$store.state.clinicIndexes;
+            // this.clinicIndexes = this.$store.state.clinicIndexes;
+            this.loadClinicIndex();
             this.timeIntervals = this.$store.state.timeIntervals;
             console.log(this.timeIntervals);
         },
         methods:{
+            loadClinicIndex:function(){
+                //设置号别信息
+                util.ajax.get("api/clinic-index/get-all-clinic-index").then(res => {
+                   this.clinicIndexes = res.data ;
+                });
+            },
             loadSchedule:function(value){
                 util.ajax.get("api/clinic-schedule/get-clinic-schedule?clinicLabel="+value).then(res=>{
                     this.clinicScheduleEntities = res.data ;
@@ -145,7 +151,8 @@
                         this.$Message.error("取消安排失败，请联系信息科")
                     }
                 })
-            }
+            },
+
 
 
         }
